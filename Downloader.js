@@ -19,6 +19,7 @@ if(os.platform() ==='win32'){
 }
 var total = null;
 var bar = null;
+var zipLevels = 1;
 var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.zip';
 
 var windows = process.platform.indexOf("win") === 0;
@@ -50,9 +51,12 @@ var _to = path.resolve('./download.zip');
 // The options argument is optional so you can omit it
 
 //clear();
-var unzipFolder = './update';
+var unzipFolder = path.resolve('./update');
 console.info('Download ' + url + ' to ' + _to);
+
 var destination = path.resolve('./');
+var skip = ['package.json'];
+
 function finish(){
     console.info('Download finish, extracting to '+destination);
     bar && bar.terminate();
@@ -168,35 +172,39 @@ function getFilesizeInBytes(filename) {
 var showDiff = true;
 
 function unzipArchive(what,where){
+
     deleteFolderRecursive(where);
-    fs.mkdirSync('./update', 0777, function(err){
-        if(err){
-            console.log('Error deleting ' +where,err);
-        }
-    });
 
     console.log('Extract into ' + destination);
 
     fs.createReadStream(what)
         .pipe(unzip.Parse())
         .on('entry', function (entry) {
+            var debug  = false;
             var fileName = entry.path;
             var type = entry.type; // 'Directory' or 'File'
             var size = entry.size;
             var parts = fileName.split('/');
-            parts.shift();
-            parts.shift();
-
+            for (var i = 0; i < zipLevels; i++) {
+                parts.shift();
+            }
             var relative = parts.join(path.sep);
 
             var dest = path.resolve(destination +'/'+relative);
-            if(showDiff && dest && type ==='File' && relative) {
 
+            console.log('file ' + fileName);
+
+            if(skip.indexOf(fileName)!==-1){
+                entry.autodrain();
+                console.log('skip '+fileName);
+                return;
+            }
+
+            if(showDiff && dest && type ==='File' && relative) {
                 var sizeD = getFilesizeInBytes(dest);
                 var diff = sizeD - size;
                 if(sizeD && sizeD!==size && Math.abs(diff)>300){
-                    console.info('Have update for : ' + diff +
-                        ' ' + relative);
+                    console.info('Have update for : ' + diff + ' ' + relative);
                 }
             }else{
                 if( showDiff && !fs.existsSync(dest) && type ==='File' ) {
@@ -205,28 +213,26 @@ function unzipArchive(what,where){
             }
 
 
+
             var dest2 = destination + path.sep + relative;
+
             //console.log('write '+ dest2);
+
             var destPath = path.dirname(dest2);
             if( !fs.existsSync(destPath) ) {
                 console.error('dest path doesnt exists '+destPath);
                 mkdirp(destPath);
             }
-            var debug  = false;
 
             var canWrite = true;
-
             try{
                 var exists = fs.existsSync(dest2);
                 var dstIsDir = exists && !fs.lstatSync(dest2).isFile();
                 var dstIsFile = exists && fs.lstatSync(dest2).isFile();
                 var dstFileExists = dstIsFile && fs.existsSync(dest2);
-
-
                 var isNativeModule = false;
-
-
                 if(dstFileExists){
+
                     if(dest2.indexOf('.node') !==-1 && dest2.indexOf('Release')!==-1){
                         canWrite=false;
                         isNativeModule = true;
@@ -235,7 +241,7 @@ function unzipArchive(what,where){
                     try{
                         fs.accessSync(dest2, fs.W_OK);
                     }catch(e){
-                        //console.error('cant write to ' + dest2);
+                        console.error('cant write to ' + dest2);
                         canWrite=false;
                     }
                 }
@@ -249,9 +255,9 @@ function unzipArchive(what,where){
                 if (type =='File' && !dstIsDir) {
                     debug && console.log('write '+relative + ' to ' + dest2 + ' exists ' + dstFileExists);
                     try{
-                        entry.pipe(fs.createWriteStream(dest2));
+                        //entry.pipe(fs.createWriteStream(dest2));
                     }catch(e){
-                        consol.error('error extracting '+ fileName + ' to ' + dest2);
+                        console.error('error extracting '+ fileName + ' to ' + dest2);
                     }
                 }else{
                     entry.autodrain();
@@ -262,11 +268,15 @@ function unzipArchive(what,where){
         });
 
 }
-if(fs.existsSync(_to)){
-    fs.unlinkSync(_to);
+var downloadFile = false;
+if(downloadFile) {
+    if (fs.existsSync(_to)) {
+        fs.unlinkSync(_to);
+    }
+    download(url,_to);
+}else {
+    unzipArchive(_to, unzipFolder);
 }
-download(url,_to);
-//unzipArchive(_to,unzipFolder);
 /*
 downloadMaster(url,_to,function(e){
    console.error('done',e);
