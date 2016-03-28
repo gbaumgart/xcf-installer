@@ -199,7 +199,7 @@ function extractDone(){
         // catch errors
         npm.commands.install([_to], function (er, data) {
             // log the error or data
-            console.log(message);
+            (er || data) && console.log('error : ' , er || data);
         });
         npm.on("log", function (message) {
             // log the progress of the installation
