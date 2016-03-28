@@ -172,8 +172,9 @@ function getFilesizeInBytes(filename) {
     return false;
 }
 
-var showDiff = true;
+var showDiff = false;
 var write = true;
+var debug  = false;
 
 function unzipArchive(what,where){
 
@@ -182,7 +183,6 @@ function unzipArchive(what,where){
     fs.createReadStream(what)
         .pipe(unzip.Parse())
         .on('entry', function (entry) {
-            var debug  = false;
             var fileName = entry.path;
             var type = entry.type; // 'Directory' or 'File'
             var size = entry.size;
@@ -250,6 +250,7 @@ function unzipArchive(what,where){
                     try{
                         if(write) {
                             entry.pipe(fs.createWriteStream(dest2));
+                            entry.autodrain();
                         }else{
                             entry.autodrain();
                         }
