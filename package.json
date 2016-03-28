@@ -1,28 +1,26 @@
 {
-  "name": "xcf-installer",
-  "version": "1.0.0",
-  "contributors": [],
-  "description":"downloads pre-built versions per platform into current directory",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gbaumgart/xcf-installer.git"
-  },
-  "dependencies": {
-    "unzip": "^0.1.11",
-    "mkdirp": "*",
-    "request": "^2.69.0",
-    "progress": "^1.1.8",
-    "request-progress": "^2.0.1"
-  },
-  "main": "Downloader.js",
-  "devDependencies": {
-  },
-  "scripts": {
-    "postinstall": "node ./Downloader.js",
-    "pretest": "npm run cache-clean && node install.js"
-  },
-  "bugs": "https://github.com/gbaumgart/xcf-installer/issues",
-  "optionalDependencies": {
-  },
-  "readmeFilename": "README.md"
+    "name": "xcf-installer",
+    "version": "1.0.1",
+    "contributors": [],
+    "description": "downloads pre-built versions per platform into current directory",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gbaumgart/xcf-installer.git"
+    },
+    "dependencies": {
+        "unzip": "^0.1.11",
+        "mkdirp": "*",
+        "request": "^2.69.0",
+        "progress": "^1.1.8",
+        "request-progress": "^2.0.1"
+    },
+    "main": "Downloader.js",
+    "devDependencies": {},
+    "scripts": {
+        "postinstall": "node ./Downloader.js",
+        "pretest": "npm run cache-clean && node install.js"
+    },
+    "bugs": "https://github.com/gbaumgart/xcf-installer/issues",
+    "optionalDependencies": {},
+    "readmeFilename": "README.md"
 }
