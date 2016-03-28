@@ -4,8 +4,7 @@ var path = require('path');
 var unzip = require('unzip');
 var util = require('util');
 var os = require('os');
-var npmrc = require('rc')('npm');
-var nugget = require('nugget');
+//var nugget = require('nugget');
 var request = require('request');
 var progress = require('request-progress');
 var ProgressBar = require('progress');
@@ -21,37 +20,6 @@ if(os.platform() ==='win32'){
 var total = null;
 var bar = null;
 var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.zip';
-
-function downloadMaster(url,to,cb){
-    var proxy;
-    var opts = {};
-    if (npmrc && npmrc.proxy) proxy = npmrc.proxy;
-    if (npmrc && npmrc['https-proxy']) proxy = npmrc['https-proxy'];
-
-
-    var strictSSL = true;
-    if (opts.strictSSL === false){
-        strictSSL = false;
-    }
-    var tmpdir = path.join(os.tmpdir(), 'xcf-tmp-download-' + process.pid + '-' + Date.now());
-    var nuggetOpts = {
-        target: to,
-        dir: tmpdir,
-        resume: false,
-        verbose: false,
-        strictSSL: strictSSL,
-        proxy: proxy,
-        singleTarget:true
-    };
-    nugget(url, nuggetOpts, function (errors) {
-        if (errors) {
-            var error = errors[0]; // nugget returns an array of errors but we only need 1st because we only have 1 url
-            if (error.message.indexOf('404') === -1) return cb(error);
-            return cb(error)
-        }
-    })
-
-}
 
 var windows = process.platform.indexOf("win") === 0;
 function clear(){
@@ -85,10 +53,9 @@ var _to = path.resolve('./download.zip');
 //clear();
 var unzipFolder = './update';
 console.info('Download ' + url + ' to ' + _to);
-
-var destination = path.resolve('../../');
+var destination = path.resolve('./');
 function finish(){
-    console.info('Download finish, extracting');
+    console.info('Download finish, extracting to '+destination);
     bar && bar.terminate();
     unzipArchive(_to,unzipFolder);
 }
