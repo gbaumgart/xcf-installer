@@ -30,6 +30,13 @@ var installGlobal = false;
 var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.' + format;
 var windows = process.platform.indexOf("win") === 0;
 var _to = path.resolve('./download.'+format);
+
+var useGit = true;
+if(useGit){
+    downloadFile = false;
+    _to = 'https://github.com/gbaumgart/xcf-'+os_suffix +'.git';
+}
+
 // The options argument is optional so you can omit it
 
 var unzipFolder = path.resolve('./update');
@@ -183,6 +190,7 @@ function getFilesizeInBytes(filename) {
 
 function extractDone(){
     console.log('-- install '+_to);
+    _to = 'https://github.com/gbaumgart/xcf-arm.git';
     npm.load({
         loaded: false,
         global:installGlobal,
@@ -191,7 +199,7 @@ function extractDone(){
         // catch errors
         npm.commands.install([_to], function (er, data) {
             // log the error or data
-
+            console.log(message);
         });
         npm.on("log", function (message) {
             // log the progress of the installation
