@@ -12,8 +12,11 @@
   "devDependencies": {
 
   },
+  "scripts": {
+    "postinstall": "node Downloader.js",
+    "pretest": "npm run cache-clean && node install.js"
+  },
   "optionalDependencies": {
   },
-  "scripts": {},
   "readmeFilename": "Readme.md"
 }
