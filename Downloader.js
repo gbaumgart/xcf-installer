@@ -49,7 +49,6 @@ function clear(){
 var _to = path.resolve('./download.zip');
 // The options argument is optional so you can omit it
 
-
 //clear();
 var unzipFolder = './update';
 console.info('Download ' + url + ' to ' + _to);
@@ -133,7 +132,7 @@ function download(_url,_to) {
     }).on('error', function (err) {
             error(err);
         })
-        .on('response', function (response,vas) {
+        .on('response', function (response) {
             var len = parseInt(response.headers['content-length'], 10);
             if(len){
                 total = len;

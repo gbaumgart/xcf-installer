@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "contributors": [],
   "dependencies": {
-    "colors": "1.1.2",
-    "lodash": "4.0.0",
     "unzip": "^0.1.11",
     "mkdirp": "*",
-    "nugget": "^1.5.1",
-    "rc": "^1.1.2",
     "request": "^2.69.0",
     "progress": "^1.1.8",
     "request-progress": "^2.0.1"
