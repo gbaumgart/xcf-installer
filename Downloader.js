@@ -1,19 +1,59 @@
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 var path = require('path');
-var request = require('request');
 var unzip = require('unzip');
-var tracer = require('tracer');
+var util = require('util');
+var os = require('os');
+var npmrc = require('rc')('npm');
+var nugget = require('nugget');
+var request = require('request');
 var progress = require('request-progress');
 var ProgressBar = require('progress');
-var commander = require('commander');
 
-var util = require('util');
-var exec = require('child_process').exec;
+var os_suffix='linux';
+if(os.platform() ==='win32'){
+    os_suffix = 'windows';
+}else if(os.platform() ==='darwin'){
+    os_suffix = 'osx';
+}else if(os.platform() ==='linux' && os.arch()=='arm'){
+    os_suffix = 'arm';
+}
+var total = null;
+var bar = null;
+var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.zip';
 
+function downloadMaster(url,to,cb){
+    var proxy;
+    var opts = {};
+    if (npmrc && npmrc.proxy) proxy = npmrc.proxy;
+    if (npmrc && npmrc['https-proxy']) proxy = npmrc['https-proxy'];
+
+
+    var strictSSL = true;
+    if (opts.strictSSL === false){
+        strictSSL = false;
+    }
+    var tmpdir = path.join(os.tmpdir(), 'xcf-tmp-download-' + process.pid + '-' + Date.now());
+    var nuggetOpts = {
+        target: to,
+        dir: tmpdir,
+        resume: false,
+        verbose: false,
+        strictSSL: strictSSL,
+        proxy: proxy,
+        singleTarget:true
+    };
+    nugget(url, nuggetOpts, function (errors) {
+        if (errors) {
+            var error = errors[0]; // nugget returns an array of errors but we only need 1st because we only have 1 url
+            if (error.message.indexOf('404') === -1) return cb(error);
+            return cb(error)
+        }
+    })
+
+}
 
 var windows = process.platform.indexOf("win") === 0;
-
 function clear(){
     var i,lines;
     var stdout = "";
@@ -38,53 +78,24 @@ function clear(){
     process.stdout.write(stdout);
 }
 
-commander
-    .version('0.0.1')
-    .option('-t, --to <path>', 'destination')
-    .option('-f, --file <path>', 'run a file')
-    .option('-u, --url <path>', 'the download url');
-
-commander.allowUnknownOption(true);
-commander.parse(process.argv);
-
-var console = tracer.colorConsole({
-    format : "<{{title}}> {{message}}",
-    dateformat : "HH:MM:ss.L"
-});
-//var _url = 'http://x4mm.net/latest.zip';
-var _url = commander.url || 'https://gitlab.com/xamiro/xcf-dist-windows/repository/archive.zip?ref=master';
 var _to = path.resolve('./download.zip');
 // The options argument is optional so you can omit it
-var bar = null;
 
-clear();
 
+//clear();
 var unzipFolder = './update';
+console.info('Download ' + url + ' to ' + _to);
 
-console.info('Download ' + _url + ' to ' + _to);
-
-var destination = path.resolve(commander.to || '../../');
-
-/**
- *
- */
+var destination = path.resolve('../../');
 function finish(){
     console.info('Download finish, extracting');
     bar && bar.terminate();
     unzipArchive(_to,unzipFolder);
 }
-/**
- *
- * @param err
- */
 function error(err){
     console.error('Error downloading file '+ _url,err)
 }
-/**
- *
- * @param secs
- * @returns {string}
- */
+
 function toHHMMSS(secs) {
     var date = new Date(secs * 1000);
     var hh = date.getUTCHours();
@@ -99,7 +110,6 @@ function toHHMMSS(secs) {
 // This formats your string to HH:MM:SS
     return  hh+":"+mm+":"+ss;
 }
-
 function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     if (bytes == 0) return '0 Byte';
@@ -117,14 +127,8 @@ function updateBar(len,duration,now,tokens) {
     }
     bar && bar.tick(now,tokens);
 }
-
-var _t0 = 0;
-var total = null;
-
-function download(_url) {
-
-    process.stdout.write("\u001b[2J\u001b[0;0H");
-
+function download(_url,_to) {
+    //process.stdout.write("\u001b[2J\u001b[0;0H");
     progress(request(_url), {
         throttle: 1000,                    // Throttle the progress event to 2000ms, defaults to 1000ms
         delay: 100                       // Only start to emit after 1000ms delay, defaults to 0ms
@@ -146,13 +150,8 @@ function download(_url) {
         //console.log('progress', state);
 
         if(!state.size.total){
-
         }
 
-        if(!_t0){
-            console.info('....downloading around 200MB...grab some coffee! \n');
-            _t0++;
-        }
         if(!state.size.total && total){
             state.size.total = total;
         }
@@ -178,7 +177,6 @@ function download(_url) {
             finish();
         }).pipe(fs.createWriteStream(_to));
 }
-
 var deleteFolderRecursive = function(path) {
     if( fs.existsSync(path) ) {
         fs.readdirSync(path).forEach(function(file,index){
@@ -298,6 +296,12 @@ function unzipArchive(what,where){
         });
 
 }
-download(_url);
-
+if(fs.existsSync(_to)){
+    fs.unlinkSync(_to);
+}
+download(url,_to);
 //unzipArchive(_to,unzipFolder);
+/*
+downloadMaster(url,_to,function(e){
+   console.error('done',e);
+});*/
