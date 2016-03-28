@@ -1,6 +1,6 @@
 {
     "name": "xcf-installer",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "contributors": [],
     "description": "downloads pre-built versions per platform into current directory",
     "repository": {
@@ -8,11 +8,12 @@
         "url": "git+https://github.com/gbaumgart/xcf-installer.git"
     },
     "dependencies": {
-        "unzip": "^0.1.11",
         "mkdirp": "*",
-        "request": "^2.69.0",
+        "npm": "^3.8.3",
         "progress": "^1.1.8",
-        "request-progress": "^2.0.1"
+        "request": "^2.69.0",
+        "request-progress": "^2.0.1",
+        "unzip": "^0.1.11"
     },
     "main": "Downloader.js",
     "devDependencies": {},
