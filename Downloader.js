@@ -128,7 +128,7 @@ function download(_url,_to) {
             state.size.total = total;
         }
         if (state.size.total) {
-            updateBar(state.size.total, null, state.size.transferred / 100, {
+            updateBar(state.size.total, null, state.size.transferred / 10, {
                 size: bytesToSize(state.size.transferred),
                 sizeTotal: bytesToSize(state.size.total),
                 speed: bytesToSize(state.speed),
@@ -174,7 +174,7 @@ function getFilesizeInBytes(filename) {
 
 var showDiff = false;
 var write = true;
-var debug  = false;
+var debug  = true;
 
 function unzipArchive(what,where){
 
@@ -193,8 +193,8 @@ function unzipArchive(what,where){
             var relative = parts.join(path.sep);
 
             var dest = path.resolve(destination +'/'+relative);
+
             if(skip.indexOf(fileName)!==-1){
-                debug && console.log('skip '+fileName);
                 entry.autodrain();
                 return;
             }
@@ -207,13 +207,13 @@ function unzipArchive(what,where){
                 }
             }else{
                 if( showDiff && !fs.existsSync(dest) && type ==='File' ) {
-                    console.log('new ' + relative);
+                    //console.log('new ' + relative);
                 }
             }
             var dest2 = destination + path.sep + relative;
             var destPath = path.dirname(dest2);
             if( !fs.existsSync(destPath) ) {
-                debug && console.error('dest path doesnt exists '+destPath);
+                //debug && console.error('dest path doesnt exists '+destPath);
                 mkdirp(destPath);
             }
 
@@ -250,7 +250,7 @@ function unzipArchive(what,where){
                     try{
                         if(write) {
                             entry.pipe(fs.createWriteStream(dest2));
-                            entry.autodrain();
+                            //entry.autodrain();
                         }else{
                             entry.autodrain();
                         }
@@ -266,7 +266,7 @@ function unzipArchive(what,where){
         });
 
 }
-var downloadFile = false;
+var downloadFile = true;
 if(downloadFile) {
     if (fs.existsSync(_to)) {
         fs.unlinkSync(_to);
