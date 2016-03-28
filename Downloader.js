@@ -182,6 +182,7 @@ function getFilesizeInBytes(filename) {
 }
 
 function extractDone(){
+    console.log('-- install '+_to);
     npm.load({
         loaded: false,
         global:installGlobal,
