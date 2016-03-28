@@ -1,6 +1,6 @@
 {
     "name": "xcf-installer",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "contributors": [],
     "description": "downloads pre-built versions per platform into current directory",
     "repository": {
