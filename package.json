@@ -18,8 +18,7 @@
     "main": "Downloader.js",
     "devDependencies": {},
     "scripts": {
-        "postinstall": "node ./Downloader.js",
-        "pretest": "npm run cache-clean && node install.js"
+        "postinstall": "node ./Downloader.js"
     },
     "bugs": "https://github.com/gbaumgart/xcf-installer/issues",
     "optionalDependencies": {},
