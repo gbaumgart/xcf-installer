@@ -7,6 +7,7 @@ var os = require('os');
 var request = require('request');
 var progress = require('request-progress');
 var ProgressBar = require('progress');
+var npm = require("npm");
 
 var os_suffix='linux';
 if(os.platform() ==='win32'){
@@ -19,7 +20,15 @@ if(os.platform() ==='win32'){
 var total = null;
 var bar = null;
 var zipLevels = 1;
-var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.zip';
+var showDiff = false;
+var write = true;
+var debug  = true;
+var downloadFile = false;
+var unzipFile = false;
+var format = 'tar.gz';
+var installGlobal = false;
+
+var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.' + format;
 
 var windows = process.platform.indexOf("win") === 0;
 function clear(){
@@ -46,7 +55,7 @@ function clear(){
     process.stdout.write(stdout);
 }
 
-var _to = path.resolve('./download.zip');
+var _to = path.resolve('./download.'+format);
 // The options argument is optional so you can omit it
 
 //clear();
@@ -62,7 +71,12 @@ var skip = [
 function finish(){
     console.info('Download finish, extracting to '+destination);
     bar && bar.terminate();
-    unzipArchive(_to,unzipFolder);
+
+    if(unzipFile) {
+        unzipArchive(_to, unzipFolder);
+    }else{
+        extractDone();
+    }
 }
 function error(err){
     console.error('Error downloading file '+ _url,err)
@@ -172,9 +186,24 @@ function getFilesizeInBytes(filename) {
     return false;
 }
 
-var showDiff = false;
-var write = true;
-var debug  = true;
+function extractDone(){
+    npm.load({
+        loaded: false,
+        global:installGlobal,
+        debug:true
+    }, function (err) {
+        // catch errors
+        npm.commands.install([_to], function (er, data) {
+            // log the error or data
+
+        });
+        npm.on("log", function (message) {
+            // log the progress of the installation
+            console.log(message);
+        });
+    });
+
+}
 
 function unzipArchive(what,where){
 
@@ -263,15 +292,23 @@ function unzipArchive(what,where){
             }catch(e){
                 console.error('---error ',e);
             }
+        })
+        .on('close',function(){
+           //console.error('--done');
+            extractDone();
         });
 
 }
-var downloadFile = true;
+
 if(downloadFile) {
     if (fs.existsSync(_to)) {
         fs.unlinkSync(_to);
     }
     download(url,_to);
 }else {
-    unzipArchive(_to, unzipFolder);
+    if(unzipFile) {
+        unzipArchive(_to, unzipFolder);
+    }else{
+        extractDone();
+    }
 }
