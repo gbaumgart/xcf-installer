@@ -27,10 +27,19 @@ var downloadFile = true;
 var unzipFile = false;
 var format = 'tar.gz';
 var installGlobal = false;
-
 var url = 'https://github.com/gbaumgart/xcf-'+os_suffix +'/archive/master.' + format;
-
 var windows = process.platform.indexOf("win") === 0;
+var _to = path.resolve('./download.'+format);
+// The options argument is optional so you can omit it
+
+var unzipFolder = path.resolve('./update');
+console.info('Download ' + url + ' to ' + _to);
+
+var destination = path.resolve('./');
+var skip = [
+    'xcf-' +os_suffix +'-master/package.json',
+    'xcf-' +os_suffix +'-master/README.md'
+];
 function clear(){
     var i,lines;
     var stdout = "";
@@ -55,23 +64,9 @@ function clear(){
     process.stdout.write(stdout);
 }
 
-var _to = path.resolve('./download.'+format);
-// The options argument is optional so you can omit it
-
-//clear();
-var unzipFolder = path.resolve('./update');
-console.info('Download ' + url + ' to ' + _to);
-
-var destination = path.resolve('./');
-var skip = [
-    'xcf-' +os_suffix +'-master/package.json',
-    'xcf-' +os_suffix +'-master/README.md'
-];
-
 function finish(){
     console.info('Download finish, extracting to '+destination);
     bar && bar.terminate();
-
     if(unzipFile) {
         unzipArchive(_to, unzipFolder);
     }else{
