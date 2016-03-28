@@ -34,3 +34,6 @@ compat
 test.js
 download.zip
 download.tar.gz
+serverlinux.exe
+serverwindows.exe
+serverarm.exe
