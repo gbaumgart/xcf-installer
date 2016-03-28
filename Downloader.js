@@ -4,7 +4,6 @@ var path = require('path');
 var unzip = require('unzip');
 var util = require('util');
 var os = require('os');
-//var nugget = require('nugget');
 var request = require('request');
 var progress = require('request-progress');
 var ProgressBar = require('progress');
@@ -55,7 +54,10 @@ var unzipFolder = path.resolve('./update');
 console.info('Download ' + url + ' to ' + _to);
 
 var destination = path.resolve('./');
-var skip = ['package.json'];
+var skip = [
+    'xcf-' +os_suffix +'-master/package.json',
+    'xcf-' +os_suffix +'-master/README.md'
+];
 
 function finish(){
     console.info('Download finish, extracting to '+destination);
@@ -169,14 +171,14 @@ function getFilesizeInBytes(filename) {
 
     return false;
 }
+
 var showDiff = true;
+var write = true;
 
 function unzipArchive(what,where){
 
     deleteFolderRecursive(where);
-
     console.log('Extract into ' + destination);
-
     fs.createReadStream(what)
         .pipe(unzip.Parse())
         .on('entry', function (entry) {
@@ -191,12 +193,9 @@ function unzipArchive(what,where){
             var relative = parts.join(path.sep);
 
             var dest = path.resolve(destination +'/'+relative);
-
-            console.log('file ' + fileName);
-
             if(skip.indexOf(fileName)!==-1){
+                debug && console.log('skip '+fileName);
                 entry.autodrain();
-                console.log('skip '+fileName);
                 return;
             }
 
@@ -211,16 +210,10 @@ function unzipArchive(what,where){
                     console.log('new ' + relative);
                 }
             }
-
-
-
             var dest2 = destination + path.sep + relative;
-
-            //console.log('write '+ dest2);
-
             var destPath = path.dirname(dest2);
             if( !fs.existsSync(destPath) ) {
-                console.error('dest path doesnt exists '+destPath);
+                debug && console.error('dest path doesnt exists '+destPath);
                 mkdirp(destPath);
             }
 
@@ -255,7 +248,11 @@ function unzipArchive(what,where){
                 if (type =='File' && !dstIsDir) {
                     debug && console.log('write '+relative + ' to ' + dest2 + ' exists ' + dstFileExists);
                     try{
-                        //entry.pipe(fs.createWriteStream(dest2));
+                        if(write) {
+                            entry.pipe(fs.createWriteStream(dest2));
+                        }else{
+                            entry.autodrain();
+                        }
                     }catch(e){
                         console.error('error extracting '+ fileName + ' to ' + dest2);
                     }
@@ -277,7 +274,3 @@ if(downloadFile) {
 }else {
     unzipArchive(_to, unzipFolder);
 }
-/*
-downloadMaster(url,_to,function(e){
-   console.error('done',e);
-});*/
